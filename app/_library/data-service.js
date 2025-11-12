@@ -12,8 +12,8 @@ export async function getCabin(id) {
     .eq("id", id)
     .single();
 
-  // For testing
-   await new Promise((res) => setTimeout(res, 3000));
+  /* // For testing
+   await new Promise((res) => setTimeout(res, 3000)); */
 
   if (error) {
     console.error(error);
@@ -49,7 +49,7 @@ export const getCabins = async function () {
   }
 
   // For testing
-  await new Promise((res) => setTimeout(res, 3000));
+  // await new Promise((res) => setTimeout(res, 3000));
 
   return data;
 };
