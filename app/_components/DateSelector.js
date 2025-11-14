@@ -30,9 +30,9 @@ function DateSelector({ settings, bookedDates, cabin }) {
         onSelect={setRange}
         min={minBookingLength + 1}
         max={maxBookingLength}
-        fromMonth={new Date()}
-        fromDate={new Date()}
-        toYear={new Date().getFullYear() + 5}
+        startMonth={new Date()}
+        startDate={new Date()}
+        endYear={new Date().getFullYear() + 5}
         captionLayout="dropdown"
         numberOfMonths={2}
       />
