@@ -1,10 +1,8 @@
-/* import { getServerSession } from "next-auth";
-import { authConfig } from "@/app/_library/auth"; */
 import Link from "next/link";
 import { auth } from "../_library/auth";
 
 export default async function Navigation() {
-  const session = await auth;
+  const session = await auth();
   return (
     <nav className="z-10 text-xl">
       <ul className="flex gap-16 items-center">
