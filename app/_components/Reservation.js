@@ -1,8 +1,13 @@
 import { getBookedDatesByCabinId, getSettings } from "../_library/data-service";
+/* import { getServerSession } from "next-auth";
+import { authConfig } from "@/app/_library/auth"; */
 import DateSelector from "./DateSelector";
 import ReservationForm from "./ReservationForm";
+import LoginMessage from "./LoginMessage";
+import { auth } from "../_library/auth";
 
 async function Reservation({ cabin }) {
+  const session = await auth();
   const [bookedDates, settings] = await Promise.all([
     getSettings(),
     getBookedDatesByCabinId(cabin.id),
@@ -15,7 +20,15 @@ async function Reservation({ cabin }) {
         bookedDates={bookedDates}
         cabin={cabin}
       />
-      <ReservationForm className="min-w-0" cabin={cabin} />
+      {session?.user ? (
+        <ReservationForm
+          className="min-w-0"
+          cabin={cabin}
+          user={session.user}
+        />
+      ) : (
+        <LoginMessage />
+      )}
     </div>
   );
 }
