@@ -1,3 +1,4 @@
+import { se } from "date-fns/locale";
 import { auth } from "../_library/auth";
 
 export const metadata = {
