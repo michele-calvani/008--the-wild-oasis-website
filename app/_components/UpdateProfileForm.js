@@ -1,18 +1,25 @@
 "use client";
 import { useState } from "react";
+import { updateGuestProfile } from "../_library/actions";
+import { useFormStatus } from "react-dom";
+import SpinnerForm from "./SpinnerForm";
 
-function UpdateProfileForm({ children }) {
+function UpdateProfileForm({ children, guest }) {
   const [count, setCount] = useState();
-  // CHANGE
-  const countryFlag = "pt.jpg";
-  const nationality = "portugal";
+  const { fullName, email, nationality, nationalID, countryFlag } = guest;
+
   return (
-    <form className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col">
+    <form
+      action={updateGuestProfile}
+      className="bg-primary-900 py-8 px-12 text-lg flex gap-6 flex-col"
+    >
       <div className="space-y-2">
         <label>Full name</label>
         <input
           disabled
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400"
+          defaultValue={fullName}
+          name="fullName"
         />
       </div>
 
@@ -21,6 +28,8 @@ function UpdateProfileForm({ children }) {
         <input
           disabled
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm disabled:cursor-not-allowed disabled:bg-gray-600 disabled:text-gray-400"
+          defaultValue={email}
+          name="email"
         />
       </div>
 
@@ -39,17 +48,33 @@ function UpdateProfileForm({ children }) {
       <div className="space-y-2">
         <label htmlFor="nationalID">National ID number</label>
         <input
+          defaultValue={nationalID}
           name="nationalID"
           className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
         />
       </div>
-
-      <div className="flex justify-end items-center gap-6">
-        <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-          Update profile
-        </button>
-      </div>
+      <Button />
+      <div className="flex justify-end items-center gap-6"></div>
     </form>
+  );
+}
+
+function Button() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300 flex items-center justify-center"
+      disabled={pending}
+    >
+      {pending ? (
+        <span className="flex items-center gap-2">
+          <SpinnerForm />
+          Updating...
+        </span>
+      ) : (
+        "Update profile"
+      )}
+    </button>
   );
 }
 
