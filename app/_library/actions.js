@@ -28,6 +28,70 @@ export async function updateGuestProfile(formData) {
   revalidatePath("/account/profile");
 }
 
+export async function createReservation(bookingData, formData) {
+  const session = await auth();
+  if (!session)
+    throw new Error("You must be signed in to create a reservation");
+
+  const cabinId = Number(bookingData.cabinId);
+  const numGuests = Number(formData.get("numGuests"));
+  const observations = (formData.get("observations") || "").slice(0, 1000);
+
+  const startDate = bookingData.startDate;
+  const endDate = bookingData.endDate;
+
+  // 1) Recupero TUTTE le prenotazioni per quella cabin
+  const { data: bookings, error } = await supabase
+    .from("bookings")
+    .select("id, startDate, endDate")
+    .eq("cabinId", cabinId);
+
+  if (error) throw new Error("Could not check availability");
+
+  const newStart = new Date(startDate);
+  const newEnd = new Date(endDate);
+
+  // 2) Controllo overlap lato server
+  const hasOverlap =
+    bookings?.some((b) => {
+      const existingStart = new Date(b.startDate);
+      const existingEnd = new Date(b.endDate);
+
+      // overlap se intervalli si toccano
+      return existingStart <= newEnd && existingEnd >= newStart;
+    }) ?? false;
+
+  if (hasOverlap) {
+    throw new Error(
+      "These dates are no longer available. Please choose another period."
+    );
+  }
+
+  // 3) Se tutto ok, creo la prenotazione
+  const newBooking = {
+    ...bookingData,
+    guestId: session.user.guestId,
+    cabinId,
+    numGuests,
+    observations,
+  };
+
+  const { error: insertError } = await supabase
+    .from("bookings")
+    .insert([newBooking]);
+
+  if (insertError) {
+    console.error("SUPABASE INSERT ERROR:", insertError);
+    console.error("PAYLOAD SENT:", newBooking);
+    throw new Error(insertError.message);
+  }
+
+  // 4) Aggiorno la cache
+  revalidatePath(`/cabins/${cabinId}`);
+  revalidatePath("/account/reservations");
+  redirect("/cabins/thankyou");
+}
+
 export async function updateReservation(formData) {
   const session = await auth();
   if (!session)

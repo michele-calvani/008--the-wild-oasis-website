@@ -1,5 +1,10 @@
 "use client";
-import { isWithinInterval } from "date-fns";
+import {
+  differenceInDays,
+  isPast,
+  isSameDay,
+  isWithinInterval,
+} from "date-fns";
 
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
@@ -18,7 +23,18 @@ function isAlreadyBooked(range, datesArr) {
 function DateSelector({ settings, bookedDates, cabin }) {
   const { range, setRange, resetRange } = useReservations();
 
-  const { regularPrice, discount, numNights, cabinPrice } = cabin;
+  // NEW: rileva se il range selezionato si sovrappone a date prenotate
+  const hasOverlap = isAlreadyBooked(range, bookedDates);
+
+  // Se c’è overlap, il range visualizzato viene azzerato
+  const displayRange = hasOverlap ? {} : range;
+
+  const { regularPrice, discount } = cabin;
+  const numNights =
+    displayRange.from && displayRange.to
+      ? differenceInDays(displayRange.to, displayRange.from)
+      : 0;
+  const cabinPrice = numNights * (regularPrice - discount);
   const { minBookingLength, maxBookingLength } = settings;
 
   return (
@@ -26,16 +42,37 @@ function DateSelector({ settings, bookedDates, cabin }) {
       <DayPicker
         className="pt-12 mx-auto"
         mode="range"
-        selected={range}
+        selected={displayRange}
         onSelect={setRange}
         min={minBookingLength + 1}
         max={maxBookingLength}
         startMonth={new Date()}
-        startDate={new Date()}
-        endYear={new Date().getFullYear() + 5}
+        fromDate={new Date()}
+        toYear={new Date().getFullYear() + 5}
         captionLayout="dropdown"
         numberOfMonths={2}
+        disabled={(curDate) =>
+          isPast(curDate) ||
+          bookedDates.some((date) => isSameDay(date, curDate))
+        }
       />
+
+      {/* NEW: messaggio di validazione quando l'intervallo viene azzerato per overlap */}
+      {hasOverlap && (
+        <div
+          className="mx-auto mt-3 max-w-[680px] px-4 py-2 rounded-sm border border-yellow-700 bg-yellow-900 text-yellow-100 text-sm"
+          role="status"
+          aria-live="polite"
+        >
+          <strong className="font-semibold">Invalid selection:</strong> the t
+          the selected range overlaps with booked dates. Choose a different
+          period or
+          <button onClick={resetRange} className="underline">
+            clear the selection
+          </button>
+          .
+        </div>
+      )}
 
       <div className="flex items-center justify-between px-8 bg-accent-500 text-primary-800 h-[72px]">
         <div className="flex items-baseline gap-6">

@@ -9,8 +9,8 @@ import { auth } from "../_library/auth";
 async function Reservation({ cabin }) {
   const session = await auth();
   const [bookedDates, settings] = await Promise.all([
-    getSettings(),
     getBookedDatesByCabinId(cabin.id),
+    getSettings(),
   ]);
   return (
     <div className="grid grid-cols-[1.2fr_1fr] gap-10 border border-primary-800 min-h-[480px] overflow-hidden">
