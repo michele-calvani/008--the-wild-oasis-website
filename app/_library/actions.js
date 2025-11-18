@@ -59,6 +59,10 @@ export async function updateReservation(formData) {
 }
 
 export async function deleteReservation(bookingId) {
+  /* // For testing useOptimistic Hook
+  await new Promise((res) => setTimeout(res, 4000));
+  throw new Error("Not implemented"); */
+
   // Controlliamo se l'utente è loggato
   const session = await auth();
   if (!session)
